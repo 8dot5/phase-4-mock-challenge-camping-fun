@@ -1,24 +1,20 @@
 class ActivitiesController < ApplicationController
-rescue_from ActiveRecord::RecordNotFound, with: :render_not_found_response
+    rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
 
     def index
-        activities = Activity.all
-        render json: activities, only: [:id, :name, :difficulty]
+        render json: Activity.all, status: :ok
     end
 
     def destroy
         activity = Activity.find(params[:id])
         activity.destroy
-        render json: {}, status: :ok
-        #head :no_content
+        render json: {}
     end
 
     private
 
-    def render_not_found_response(error)
-        # render json: { error: "#{error.model} Not Found" }, status: :not_found
-
+    def render_not_found
+        # render json: { error: "#{ error.model } not found" }, status: :not_found
         render json: { error: "Activity not found" }, status: :not_found
     end
-    
 end

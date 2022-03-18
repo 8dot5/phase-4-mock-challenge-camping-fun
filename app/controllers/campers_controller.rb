@@ -1,14 +1,13 @@
 class CampersController < ApplicationController
-    rescue_from ActiveRecord::RecordNotFound, with: :render_not_found_response
-    rescue_from ActiveRecord::RecordInvalid, with: :render_unprocessable_entity_response
+rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+rescue_from ActiveRecord::RecordInvalid, with: :render_invalid
     def index
-        campers = Camper.all
-        render json: campers, status: :ok, only: [:id, :name, :age]
+        render json: Camper.all, status: :ok
     end
-
+    
     def show
         camper = Camper.find(params[:id])
-        render json: camper, include: :activities
+        render json: camper, serializer: CamperActivitySerializer, status: :ok
     end
 
     def create
@@ -18,20 +17,16 @@ class CampersController < ApplicationController
 
     private
 
-    # why doesn't this work?
-    # def render_not_found_response(error)
-    #     render json: { error: "#{error.model} Not Found" }, status: :not_found
-    # end
-
-    def render_not_found_response(error)
-        render json: { error: "Camper not found" }, status: :not_found
-    end
-
-    def render_unprocessable_entity_response(invalid)
-        render json: { errors: invalid.record.errors.full_messages }, status: :unprocessable_entity
-    end
-
     def camper_params
         params.permit(:name, :age)
+    end
+    
+    def render_not_found(error)
+        # render json: { error: "#{ error.model } not found"}, status: :not_found
+        render json: { error: "#{ error.model } not found"}, status: :not_found
+    end
+
+    def render_invalid(invalid)
+        render json: { errors: invalid.record.errors.full_messages }, status: :unprocessable_entity
     end
 end
